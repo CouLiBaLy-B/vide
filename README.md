@@ -1,7 +1,7 @@
 # vide
 
 # Structure du projet
-"""
+"""md
 trading_system/
 │
 ├── docker-compose.yml           # Orchestration des conteneurs
