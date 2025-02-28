@@ -1,0 +1,135 @@
+Vous êtes chargé de concevoir et de développer une application multi-agent en Python pour la gestion de portefeuille, le trading algorithmique, la prévision des prix des actions et la gestion des risques sur le marché boursier. Le système doit être flexible pour fonctionner aussi bien sur un horizon à court terme (trading rapide) qu’à long terme (investissement durable). Il doit inclure les agents suivants :
+
+- **5 agents analystes**, chacun inspiré des philosophies d’investissement de Warren Buffet, Charlie Munger, Peter Lynch, Benjamin Graham et Ray Dalio. Ces agents analyseront les données des entreprises et généreront des signaux d’achat, de vente ou de conservation.
+- **1 agent gestionnaire**, qui collectera les recommandations des analystes et décidera de l’allocation du capital dans le portefeuille.
+- **1 agent trader**, qui exécutera les transactions basées sur les décisions du gestionnaire, avec des stratégies adaptées à l’horizon choisi.
+- **1 agent de risque**, qui surveillera les performances et interviendra si les risques dépassent des seuils prédéfinis.
+
+Le système doit être construit en Python, en utilisant une architecture moderne basée sur des conteneurs Docker pour la scalabilité et des technologies spécifiques pour les données, la communication et l’apprentissage.
+
+---
+
+### Technologies et bibliothèques à utiliser
+
+- **Sources de données** :
+  - Données historiques et fondamentales des entreprises via la bibliothèque [yfinance](https://pypi.org/project/yfinance/).
+  - Données de sentiment extraites via l’API de X (anciennement Twitter) pour capturer les tendances du marché ou des entreprises spécifiques.
+- **Communication entre agents** :
+  - File de messages asynchrone avec **RabbitMQ** pour transmettre les signaux et décisions.
+  - Base de données partagée avec **PostgreSQL** pour stocker les données historiques, les recommandations et les métriques de performance.
+- **Déploiement** :
+  - Chaque agent doit être encapsulé dans un conteneur **Docker** pour une scalabilité et une gestion indépendante.
+- **Machine learning et analyse** :
+  - **pandas** pour la manipulation des données.
+  - **NumPy** pour les calculs numériques.
+  - **scikit-learn** pour les modèles d’apprentissage simples.
+  - **TensorFlow** pour les modèles de séries temporelles complexes (par exemple, LSTM), si nécessaire.
+  - **matplotlib** pour la visualisation des performances.
+- **Logging et monitoring** :
+  - Implémenter un système de logging détaillé (via la bibliothèque **logging**) et un monitoring pour suivre les performances et détecter les anomalies.
+
+---
+
+### Rôles et spécifications des agents
+
+#### Agents analystes
+Chaque agent analyste doit analyser un groupe d’entreprises et produire un signal (achat, vente ou conservation) basé sur des métriques spécifiques inspirées de son investisseur correspondant. Voici les détails :
+
+- **Agent Warren Buffet** :
+  - Métriques : ROE > 10 %, ratio dette/équité < 0.5, croissance des bénéfices sur 5 ans > 5 %, P/E < moyenne sectorielle, P/B < 1.5.
+  - Ignore les données de sentiment de X.
+- **Agent Charlie Munger** :
+  - Métriques : ROE > 15 %, ratio dette/équité < 0.3, croissance des bénéfices sur 10 ans > 7 %, P/E < 80 % de la moyenne sectorielle, P/B < 1.0.
+  - Utilise les données de X pour des insights qualitatifs sur les entreprises.
+- **Agent Peter Lynch** :
+  - Métriques : Croissance des bénéfices sur 3 ans > 15 %, flux de trésorerie positif, achats par les initiés détectés.
+  - Intègre les données de sentiment de X pour évaluer la perception publique.
+- **Agent Benjamin Graham** :
+  - Métriques : Nombre de Graham (racine carrée de 22.5 * valeur comptable par action * bénéfice par action), P/E < 15, P/B < 1.5, faible endettement.
+  - Ignore les données de X.
+- **Agent Ray Dalio** :
+  - Métriques : Analyse macro-économique (inflation, PIB, taux d’intérêt) combinée à des données fondamentales.
+  - Utilise les données de sentiment de X pour évaluer l’humeur générale du marché.
+
+Les signaux générés par ces agents doivent être publiés dans la file RabbitMQ pour être consommés par l’agent gestionnaire.
+
+#### Agent gestionnaire
+- **Rôle** : Collecte les signaux des analystes, les pondère en fonction de leurs performances historiques, et optimise l’allocation du capital.
+- **Méthode** : Utilise une approche comme l’optimisation mean-variance ou une heuristique personnalisée.
+- **Adaptation** : Ajuste dynamiquement les poids des recommandations des analystes en fonction de leur précision passée (apprentissage adaptatif).
+
+#### Agent trader
+- **Rôle** : Exécute les transactions basées sur les allocations décidées par l’agent gestionnaire.
+- **Stratégies** :
+  - **Court terme** : Momentum, arbitrage, modèles de séries temporelles (ARIMA ou LSTM).
+  - **Long terme** : Stratégie d’achat et de tenue avec rééquilibrages périodiques.
+- **Flexibilité** : Doit inclure un paramètre configurable pour basculer entre les horizons court terme et long terme.
+
+#### Agent de risque
+- **Rôle** : Surveille les métriques de risque en temps réel et intervient si nécessaire.
+- **Métriques** : Ratio de Sharpe, drawdown maximum.
+- **Intervention** : Réduit l’exposition au marché si le drawdown dépasse un seuil (par exemple, 10 %).
+
+---
+
+### Architecture et communication
+
+- **Infrastructure** :
+  - Chaque agent est un conteneur Docker indépendant.
+  - Les agents communiquent via RabbitMQ pour les messages asynchrones (par exemple, signaux d’achat/vente).
+  - Une base de données PostgreSQL centralisée stocke les données historiques, les recommandations et les performances.
+- **Scalabilité** :
+  - Les conteneurs doivent pouvoir être déployés et scalés indépendamment avec Docker Compose ou Kubernetes.
+
+---
+
+### Apprentissage et adaptation
+
+- **Évaluation des performances** :
+  - Le système doit évaluer régulièrement la précision des prédictions de chaque analyste (par exemple, taux de succès des signaux).
+  - Les poids des recommandations des analystes doivent être ajustés en fonction de ces performances.
+- **Mise à jour des modèles** :
+  - Si des modèles de machine learning sont utilisés (par exemple, pour le trading à court terme), ils doivent être réentraînés périodiquement avec des données historiques actualisées.
+
+---
+
+### Considérations pratiques
+
+- **Simulation préalable** :
+  - Testez le système en simulation avec des données historiques de yfinance avant de le connecter à un courtier réel (par exemple, via l’API Alpaca).
+- **Logging et monitoring** :
+  - Implémentez un logging détaillé pour tracer chaque décision et un système de monitoring pour détecter les anomalies ou sous-performances.
+- **Flexibilité horizon** :
+  - Ajoutez des paramètres configurables pour adapter les stratégies et la fréquence d’analyse entre court terme et long terme.
+
+---
+
+### Défis potentiels et solutions
+
+- **Conflit court terme/long terme** :
+  - Pour les agents orientés long terme (Buffet, Graham), utilisez leurs métriques pour identifier des entreprises solides, puis appliquez des filtres techniques pour le trading à court terme si nécessaire.
+- **Limitations de l’API de X** :
+  - Vérifiez les quotas de l’API et envisagez des alternatives (par exemple, des fournisseurs de données de sentiment) si les limites sont trop restrictives.
+- **Performance système** :
+  - Optimisez les appels à yfinance et X pour éviter les goulets d’étranglement, et ajustez la fréquence des analyses pour le long terme si besoin.
+
+---
+
+### Instructions étape par étape pour la construction
+
+1. **Configurer les agents analystes** :
+   - Implémentez les calculs des métriques pour chaque investisseur en utilisant les données de yfinance et, pour certains, les données de X.
+   - Assurez-vous que chaque agent publie ses signaux dans RabbitMQ.
+2. **Développer l’agent gestionnaire** :
+   - Créez un module pour consommer les signaux de RabbitMQ et optimiser l’allocation du capital.
+3. **Construire l’agent trader** :
+   - Implémentez des stratégies pour le court terme (momentum, séries temporelles) et le long terme (achat et tenue), avec un paramètre pour basculer entre les deux.
+4. **Intégrer l’agent de risque** :
+   - Calculez les métriques de risque en continu et définissez des seuils d’intervention.
+5. **Mettre en place l’infrastructure** :
+   - Configurez RabbitMQ pour la communication et PostgreSQL pour le stockage.
+   - Créez des conteneurs Docker pour chaque agent et testez l’orchestration avec Docker Compose.
+6. **Ajouter l’apprentissage adaptatif** :
+   - Développez un module pour suivre les performances des analystes et ajuster leurs poids.
+7. **Tester le système** :
+   - Effectuez un backtest avec des données historiques pour valider les performances avant de passer au marché réel.
