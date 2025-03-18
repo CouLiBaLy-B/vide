@@ -1,7 +1,7 @@
 # vide
 
 # Structure du projet
-"""md
+```md
 trading_system/
 │
 ├── docker-compose.yml           # Orchestration des conteneurs
@@ -41,6 +41,6 @@ trading_system/
 │   └── logging_utils.py         # Configuration des logs
 │
 └── Dockerfile                   # Image Docker de base
-"""
+```
 
 # Configuration Docker et déploiement

@@ -1,0 +1,20 @@
+# Data sources
+yfinance
+tweepy
+pandas
+numpy
+
+# Database and messaging
+psycopg2-binary
+pika
+
+# Machine learning
+scikit-learn
+tensorflow
+
+# Visualization
+matplotlib
+
+# Utils
+python-dotenv
+nltk
